@@ -2264,6 +2264,13 @@
     sudo-prompt "^9.0.0"
     wcwidth "^1.0.1"
 
+"@react-native-community/datetimepicker@^3.4.7":
+  version "3.4.7"
+  resolved "https://registry.yarnpkg.com/@react-native-community/datetimepicker/-/datetimepicker-3.4.7.tgz#84613cda2cf06315530628cdf07c77076eae5ec3"
+  integrity sha512-T5MG05ekf9iLSdpBPDbXcOUP6c9pNVhCEVCp9jfjQxj+4dpVQMiCSyLJdPM543uv9KloIZZ71vs+Um01AbwO7A==
+  dependencies:
+    invariant "^2.2.4"
+
 "@react-native-community/eslint-config@^0.0.5":
   version "0.0.5"
   resolved "https://registry.npmjs.org/@react-native-community/eslint-config/-/eslint-config-0.0.5.tgz"
@@ -8027,7 +8034,21 @@ modal-react-native-web@0.2.0:
   dependencies:
     warning "^4.0.1"
 
-moment@^2.24.0:
+moment-timezone@^0.5.33:
+  version "0.5.33"
+  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.33.tgz#b252fd6bb57f341c9b59a5ab61a8e51a73bbd22c"
+  integrity sha512-PTc2vcT8K9J5/9rDEPe5czSIKgLoGsH8UNpA4qZTVw0Vd/Uz19geE9abbIOQKaAQFcnQ3v5YEXrbSc5BpshH+w==
+  dependencies:
+    moment ">= 2.9.0"
+
+moment-weekdaysin@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/moment-weekdaysin/-/moment-weekdaysin-1.0.1.tgz#e2f7f22a52ab0db4d6f71430fb03c2aa0577cf07"
+  integrity sha1-4vfyKlKrDbTW9xQw+wPCqgV3zwc=
+  dependencies:
+    moment ">=2.1.0"
+
+"moment@>= 2.9.0", moment@>=2.1.0, moment@^2.24.0, moment@^2.29.1:
   version "2.29.1"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.1.tgz#b2be769fa31940be9eeea6469c075e35006fa3d3"
   integrity sha512-kHmoybcPV8Sqy59DwNDY3Jefr64lK/by/da0ViFcuA4DH0vQg5Q6Ze5VimxkfQNSC+Mls/Kx53s7TjP1RhFEDQ==
@@ -9322,6 +9343,11 @@ react-native-country-picker-modal@^2.0.0:
     prop-types "15.7.2"
     react-async-hook "3.6.1"
 
+react-native-date-picker@^3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/react-native-date-picker/-/react-native-date-picker-3.3.0.tgz#2fb5dd89c28c589e7105d1ab58d7f150fa73e7c6"
+  integrity sha512-7hllNNQtdg+vO92xNSjz6tsQBNOlr4VjYCG+4L65tPiYMolJ/JJeLbpA0WMtYtKKTitvFKr769ZaJeAGpx+3Wg==
+
 react-native-elements@^3.3.2:
   version "3.3.2"
   resolved "https://registry.npmjs.org/react-native-elements/-/react-native-elements-3.3.2.tgz"
@@ -9433,6 +9459,13 @@ react-native-maps@^0.28.0:
   integrity sha512-F+k5ZT9hhl+iXR1H+5ZcoHOEB5lPu9gCIwtA4lI/LoI9nfa9xFvr1vMiLIv44jzeGNzbE3+/R81IpcNDMJ5uDg==
   dependencies:
     "@types/geojson" "^7946.0.7"
+
+react-native-modal-datetime-picker@^9.2.2:
+  version "9.2.2"
+  resolved "https://registry.yarnpkg.com/react-native-modal-datetime-picker/-/react-native-modal-datetime-picker-9.2.2.tgz#b4a2b7b55b01f97adc7b47ccbe003336e0aa6403"
+  integrity sha512-ESA/ZWpfTT6PLsJChAS9lAfEeIIBW6M9jDIiRCfsHqtbo8oQvLfiLGlYYn89Omeh75aqCkirMPdJRhyh6ZDKhg==
+  dependencies:
+    prop-types "^15.7.2"
 
 react-native-modal@^11.10.0:
   version "11.10.0"
@@ -9554,6 +9587,13 @@ react-native-swipe-gestures@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/react-native-swipe-gestures/-/react-native-swipe-gestures-1.0.5.tgz#a172cb0f3e7478ccd681fd36b8bfbcdd098bde7c"
   integrity sha512-Ns7Bn9H/Tyw278+5SQx9oAblDZ7JixyzeOczcBK8dipQk2pD7Djkcfnf1nB/8RErAmMLL9iXgW0QHqiII8AhKw==
+
+react-native-tableview@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/react-native-tableview/-/react-native-tableview-3.1.0.tgz#a5ae519bf587a750f5c584085b5904e8f179f989"
+  integrity sha512-TWs8aZZyMwUQBQs7droDPJuNy9EzR33Z2oS+OF880Wc9IonFk5UboDhixPS7kZts0fLsniEMJF0uDjDRYHaYEA==
+  dependencies:
+    prop-types "^15.6.2"
 
 react-native-typing-animation@^0.1.7:
   version "0.1.7"

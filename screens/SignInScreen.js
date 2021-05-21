@@ -10,7 +10,7 @@ import {
     ScrollView,
     Alert, Image, Dimensions,CheckBox,
 } from 'react-native';
-import {GoogleSignin, statusCodes} from 'react-native-google-signin';
+//import {GoogleSignin, statusCodes} from 'react-native-google-signin';
 import SplashScreen_Appointments from './SplashScreen_Appointments';
 import * as Animatable from 'react-native-animatable';
 import LinearGradient from 'react-native-linear-gradient';
@@ -26,10 +26,10 @@ import validator from 'validator';
 import Realm from "realm";
 import { LoginManager, AccessToken } from 'react-native-fbsdk';
 
-GoogleSignin.configure({
-    webClientId:
-        "1060583277364-quo1b67cbu3j8e9ds589s8ndp5338loq.apps.googleusercontent.com",
-});
+//GoogleSignin.configure({
+  //  webClientId:
+    //    "1060583277364-quo1b67cbu3j8e9ds589s8ndp5338loq.apps.googleusercontent.com",
+//});
 const SignInScreen = ({navigation}) => {
     console.log("i'm here1");
     const [isSelected, setSelection] = React.useState(false);
@@ -109,12 +109,12 @@ const SignInScreen = ({navigation}) => {
             });
         }
     }
-    const __onGoogleButtonPress = async()=> {
-        const { idToken } = await GoogleSignin.signIn();
-        const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-       let response= await auth().signInWithCredential(googleCredential);
+   // const __onGoogleButtonPress = async()=> {
+  //      const { idToken } = await GoogleSignin.signIn();
+  //      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+ //      let response= await auth().signInWithCredential(googleCredential);
 
-    }
+  //  }
     const __onFacebookButtonPress = async()=>{
         LoginManager.logInWithPermissions(['public_profile', 'email'])
             .then((result) => {
@@ -316,7 +316,7 @@ const SignInScreen = ({navigation}) => {
                          }}/>
                   </TouchableOpacity>
 
-                  <TouchableOpacity onPress={()=>__onGoogleButtonPress()}
+                  <TouchableOpacity onPress={()=>{}}
                                   >
                       <Image source={require('../assets/SignIn/google_button.png')} style={{
                           resizeMode: 'stretch',width : width*0.4,height : height*0.068,left:width*0.07}} />

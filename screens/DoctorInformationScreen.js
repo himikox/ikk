@@ -9,7 +9,7 @@ import {
     FlatList,
     TouchableOpacity,
     TextInput,
-    Platform, PermissionsAndroid, Picker,
+    Platform, PermissionsAndroid, Picker, ImageBackground,
 } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import {  Dimensions } from 'react-native';
@@ -21,6 +21,7 @@ import ProfileScreen from './ProfileScreen';
 import DetailsScreen from './DetailsScreen';
 import SettingsScreen from './SettingsScreen';
 import MainTabScreen from './MainTabScreen';
+import DoctorScheduleInputScreen from './DoctorScheduleInputScreen'
 import HomeScreen from './HomeScreen';
 //import Geolocation from '@react-native-community/geolocation';
 import Alert from 'react-native/Libraries/Alert/Alert';
@@ -43,6 +44,7 @@ const HomeStack = createStackNavigator();
 const DetailsStack = createStackNavigator();
 const ProfileStack = createStackNavigator();
 const SettingsStack = createStackNavigator();
+
 import * as ImagePicker from "react-native-image-picker"
 const Drawer = createDrawerNavigator();
 const Tab = createMaterialBottomTabNavigator();
@@ -50,7 +52,7 @@ const GOOGLE_PLACES_API_KEY = 'AIzaSyCr7GbsKQ2p9oL6F43YqbyxqT7QbV79b5g'; // neve
 const DoctorInformationScreen = ({navigation}) => {
     let newWidth = 480;
     let newHeight =480;
-    let compressFormat = 'PNG';
+    let compressFormat = 'JPEG';
     let quality = 100;
     let rotation = 0;
     let outputPath = null;
@@ -114,7 +116,7 @@ const DoctorInformationScreen = ({navigation}) => {
 
 
    }
-
+//reduce image dimensions
    useEffect(
        ()=>{
            if(file)
@@ -134,6 +136,7 @@ const DoctorInformationScreen = ({navigation}) => {
                        // response.uri is the URI of the new image that can now be displayed, uploaded...
                        //resized image uri
                        let uri = response.uri;
+                       console.log("file,,",response.uri);
                        //generating image name
                        let imageName = 'profile_picture/' + userId;
                        //to resolve file path issue on different platforms
@@ -143,10 +146,7 @@ const DoctorInformationScreen = ({navigation}) => {
                            uploadUri,
                            imageName,
                        });
-                       setData({
-                           ...data,
-                           picture:image
-                       })
+
                        console.log("image resizing ==",image)
                    })
                    .catch((err) => {
@@ -158,53 +158,7 @@ const DoctorInformationScreen = ({navigation}) => {
    )
 
 
-    const __doAdd = async() => {
 
-console.log("user id is",userId);
-
-
-        if(image)
-        {
-            const ref = firebase.storage().ref(image.imageName);
-           await
-                ref.putFile(image.uploadUri)
-                .then((snapshot) => {
-                    //You can check the image is now uploaded in the storage bucket
-                    console.log(image.imageName," has been successfully uploaded.");
-                })
-                .catch((e) => console.log('uploading image error => ', e));
-           await  ref.getDownloadURL()
-               .then(async(url) => {
-                   await  firestore()
-                       .collection('user')
-                       .doc(userId)
-                       .update({
-                           picture_url:url,
-                           professional_info:
-                               {   location : selectedLocation.toLowerCase(),
-                                   speciality: selectedSpeciality.toLowerCase()
-                               }
-                       })
-               })
-               .catch(e=>{console.log(e);})
-
-
-        }
-
-        auth()
-
-            .signOut()
-            .then(() => console.log('User signed out!'));
-        console.log('informations done');
-    }
-    const handleChoosePhoto = () => {
-        launchImageLibrary({ noData: true }, (response) => {
-            // console.log(response);
-            if (response) {
-                setPhoto(response);
-            }
-        });
-    };
 
     return (
         <View style={styles.container}>
@@ -216,8 +170,45 @@ console.log("user id is",userId);
                 animation="fadeInUpBig"
                 style={styles.footer}
             >
-                <View style={{flex:1}}>
-                <Text style={styles.text_header}>Working Information</Text>
+                <View style={{flex:1,alignItems:'center'}}>
+                    <View style={{
+
+                        width:width*1.2,
+                        height:"10%",
+                        alignItems:'center',
+                        alignContent: 'center',
+
+                        borderColor: '#e2e2e2',
+                    }
+                    }
+
+                    >
+                        <ImageBackground
+                            style={{  height:"100%",width:width*1.2, flexDirection: 'row',  flexWrap: "wrap",alignItems:'center',
+                                alignContent: 'center',}}
+                            source={require("../assets/header.png")}
+                        >
+                            <View style={{flex:3,height:"80%",
+                                alignContent: 'center',}}
+
+                            >
+                                <Icon.Button name="ios-exit"  size={40} backgroundColor="transparent" style={{marginLeft:50}}
+                                       onPress={()=>{
+                                           auth()
+
+                                               .signOut()
+                                               .then(() => console.log('User signed out!'));
+
+                                       }}
+                                           ></Icon.Button>
+                            </View>
+
+                            <View style={{flex:9,alignItems:'flex-start'}}>
+                                <Text style={{color:'#fff',fontSize:25}}>Working Infromation</Text>
+                            </View>
+                        </ImageBackground>
+                    </View>
+
 
                 <View style={styles.textPrivate}>
                     <Text style={styles.color_textPrivate}>
@@ -323,7 +314,8 @@ console.log("user id is",userId);
 
                     <TouchableOpacity
         style={{resizeMode: 'stretch',width : width*0.9,alignItems: 'center',height : height*0.12,flex:1}}
-        onPress={() => {__doAdd (  )}}
+        onPress={() => {navigation.navigate('DoctorScheduleInputScreen',
+            {selectedSpeciality:selectedSpeciality,selectedLocation:selectedLocation,image:image })}}
     >
         <Image source={require('../assets/SignUp/Button.png')}    style={{resizeMode: 'stretch',width : width*0.98,alignItems: 'center',height : height*0.12}}/>
 
@@ -394,6 +386,7 @@ const styles = StyleSheet.create({
     },
     footer: {
         flex: 15,
+
         backgroundColor: '#ffffff',
 
         paddingHorizontal: width*0.05

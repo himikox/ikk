@@ -6,6 +6,8 @@
  * @flow
  */
 
+
+
 import React, { useState,useEffect } from 'react';
 import {View, ActivityIndicator, Alert, TouchableOpacity, Image, Dimensions} from 'react-native';
 import {
@@ -31,7 +33,7 @@ import SupportScreen from './screens/SupportScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import BookmarkScreen from './screens/BookmarkScreen';
 
-import { AuthContext } from './components/context';
+import { PageContext } from './components/context';
 
 import RootStackScreen from './screens/RootStackScreen';
 import DoctorInformationScreen from './screens/DoctorInformationScreen';
@@ -45,6 +47,8 @@ import HomeScreen from './screens/HomeScreen';
 import {LinearGradient} from 'react-native-svg';
 import FindDoctorScreen from './screens/FindDoctorScreen';
 import ForgotPasswordScreen from './screens/ForgotPasswordScreen';
+import DoctorScheduleInputScreen from './screens/DoctorScheduleInputScreen';
+import DoctorCheckAppointmentList from './screens/DoctorCheckAppointmentList';
 
 const HomeStack = createStackNavigator();
 const DetailsStack = createStackNavigator();
@@ -55,6 +59,10 @@ const RootStack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
 function App ({route}) {
+   const [doctorDone, setDoctorDone] = useState(false);
+   const changeDoctorState=()=>{
+       setDoctorDone(false);
+   }
   // const [isLoading, setIsLoading] = React.useState(true);
   // const [userToken, setUserToken] = React.useState(null);
 
@@ -93,20 +101,40 @@ function App ({route}) {
 
   const theme = isDarkTheme ? CustomDarkTheme : CustomDefaultTheme;
   const [initializing, setInitializing] = useState(true);
-  const [user, setUser] = useState();
-    const [utilisateur, setUtilisateur] = useState({
-        firstname :'',
-        lastname : '',
-        mail : '',
-        phone:'',
-        type:''
-    });
+  const [user, setUser] = useState(false);
+    const [utilisateur, setUtilisateur] = useState(false);
+    const userSettings = {
+        user:user,
+        doctorDone:doctorDone,
+    };
 
 
       const toggleTheme= () => {
       setIsDarkTheme( isDarkTheme => !isDarkTheme );
     }
 
+    useEffect(()=>{
+
+        if(utilisateur)
+        {
+            if(utilisateur.type==='doctor')
+            {
+                firestore()
+                    .collection('user')
+                    .doc(auth().currentUser.uid).get()
+                    .then(documentSnapshot => {
+                        if( documentSnapshot.data()['professional_info']['location'])
+                        {
+                            setUtilisateur({
+                                ...utilisateur,
+                                doctorDone:true,
+                            });
+                        }
+                    });
+            }
+        }
+
+    },[utilisateur])
 
     useEffect(() => {
 
@@ -119,6 +147,7 @@ function App ({route}) {
                 .then(documentSnapshot => {
                     setUtilisateur({
                         ...utilisateur,
+                        id:auth().currentUser.uid,
                         firstname : documentSnapshot.data()['name']['firstname'],
                         lastname : documentSnapshot.data()['name']['lastname'],
                         mail : documentSnapshot.data()['mail'],
@@ -129,6 +158,7 @@ function App ({route}) {
                     //  user['firstname'] = documentSnapshot.data()['firstname'];
                     // console.log('data',user)
                 });
+
 
         }
 
@@ -186,7 +216,7 @@ function App ({route}) {
 
           return (
 
-              <PaperProvider theme={theme}>
+              <PageContext.Provider value={[utilisateur, setUtilisateur]}>
 
                   <NavigationContainer theme={theme}>
                       {utilisateur.type === 'patient' &&
@@ -205,18 +235,24 @@ function App ({route}) {
 
                       </Drawer.Navigator>
                       }
-                      {utilisateur.type === 'doctor' &&
+                      {utilisateur.type === 'doctor' && !utilisateur.doctorDone &&
                           <Stack.Navigator headerMode='none'>
                               <Stack.Screen name="Form" component={DoctorInformationScreen} />
+                              <Stack.Screen name="DoctorScheduleInputScreen" component={DoctorScheduleInputScreen} />
 
                           </Stack.Navigator>
 
+                      }
+                      {utilisateur.type === 'doctor' && utilisateur.doctorDone &&
+                      <Stack.Navigator headerMode='none'>
+                          <Stack.Screen name="DoctorProfile" component={DoctorCheckAppointmentList} />
 
 
+                      </Stack.Navigator>
                       }
                   </NavigationContainer>
 
-              </PaperProvider>
+              </PageContext.Provider>
           );
 
 

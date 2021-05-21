@@ -265,7 +265,8 @@ const SignUpScreen = ({navigation}) => {
                             mail : data.mail,
                             name : {
                             firstname: data.firstname ,
-                            lastname : data.lastname},
+                            lastname : data.lastname
+                            },
                             phone: data.phone
                         })
                         .then(() => {

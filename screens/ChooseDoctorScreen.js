@@ -11,6 +11,7 @@ import {
     ScrollView,
     Pressable, ImageBackground,
 } from 'react-native';
+import moment from "moment";
 import Modal from 'react-native-modal';
 //import Geolocation from '@react-native-community/geolocation';
 import Alert from 'react-native/Libraries/Alert/Alert';
@@ -24,7 +25,8 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import DoctorProfileScreen from './DoctorProfileScreen'
 import * as Animatable from 'react-native-animatable';
 import {Calendar, CalendarList, Agenda} from 'react-native-calendars';
-
+import mom from 'moment-weekdaysin';
+import moment_tz from 'moment-timezone';
 const ChooseDoctorScreen = ({ navigation, route }) => {
     const [longitude, setLongitude] = React.useState(false);
     const [latitude, setLatitude] = React.useState(false);
@@ -33,6 +35,7 @@ const ChooseDoctorScreen = ({ navigation, route }) => {
         longitude: number;
     }
     const [location, setLocation] = React.useState(null);
+    const [timeView, setTimeView] = React.useState(false);
 
     const [granted, setGranted] = React.useState(null);
     console.log(route.params);
@@ -41,30 +44,87 @@ const ChooseDoctorScreen = ({ navigation, route }) => {
     const [currentItem, setCurrentItem] = useState(false);
     const [viewVisible, setViewVisible] = useState(false);
     const [appointmentViewVisible, setAppointmentViewVisible] = useState(false);
+    const [timeViewVisible, setTimeViewVisible] = useState(false);
     const [doctorVisible, setDoctorVisible] = useState(true);
     const [personalVisible, setPersonalVisible] = useState(false);
     const [addressVisible, setAddressVisible] = useState(false);
-    const [selectedDate, setSelectedDate] = useState('');
-    const [markedDates, setMarkedDates] = useState({
-        '2021-05-16': {selected: true, marked: true, selectedColor: 'blue'},
-    })
+    const [selectedDate, setSelectedDate] = useState(false);
+    const [selectedTime, setSelectedTime] = useState(false);
+    const [markedDates, setMarkedDates] = useState({})
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [workingTime, setWorkingTime] = useState([]);
 
     const [firstName, setFirstName] = useState("");
     const [imageUrl, setImageUrl] = useState("");
     const [ loading, setLoading ] = useState(true);
-    const [doctor,setDoctor]=useState({
-        id:'',
-        firstname:'',
-        lastname:'',
-        mail: '',
-        phone:'',
-        professional_info:{
-            speciality:'',
-            location:'',
+    const [ workingDates, setWorkingDates ] = useState([]);
+    const db = firestore().collection('user').where('type','==','doctor')
+
+
+
+    const [selectedDays, setSelectedDays] = React.useState([
+        {   abbreviation:'M',
+            name:'Monday',
+            isOpen:true,//closed or open
+            time:[   {
+                openTime:'08:00',
+                closeTime:'17:00'
+            }],
+
+
+        },
+        {   abbreviation:'T',
+            name:'Tuesday',
+            isOpen:true,//closed or open
+            time:[   {
+                openTime:'08:00',
+                closeTime:'17:00'
+            }],
+
+
+        },
+        {abbreviation:'W',
+            name:'Wednesday',
+            isOpen:true,//closed or open
+            time:[   {
+                openTime:'08:00',
+                closeTime:'17:00'
+            }],
+        },
+        {abbreviation:'T',
+            name:'Thursday',
+            isOpen:true,//closed or open
+            time:[   {
+                openTime:'08:00',
+                closeTime:'17:00'
+            }],
+
+        },
+        {abbreviation:'F',
+            name:'Friday',
+            isOpen:true,//closed or open
+            time:[   {
+                openTime:'08:00',
+                closeTime:'17:00'
+            }],
+
+        },
+        {abbreviation:'S',
+            name:'Saturday',
+            isOpen:false,//closed or open
+            time:[ ],
+
+        },
+        {abbreviation:'S',
+            name:'Sunday',
+            isOpen:false,//closed or open
+            time:[ ],
+
         },
 
-        picture_url:null,
-    });
+    ]);
+    const [doctor,setDoctor]=useState(false);
+
     const findCoordinates = async() => {
         try {
             let granted = await PermissionsAndroid.request(
@@ -101,6 +161,7 @@ const ChooseDoctorScreen = ({ navigation, route }) => {
             }
         },[addressVisible]
     );
+
     useEffect(
         () => {
 
@@ -129,9 +190,98 @@ const ChooseDoctorScreen = ({ navigation, route }) => {
         }, [granted]
     );
 
+    useEffect(()=>{
+
+if(doctor)
+{
 
 
-    const db = firestore().collection('user').where('type','==','doctor')
+             console.log(doctor);
+             let list=[];
+             console.log("mondays : ",mom(new Date()).weekdaysInMonth('Monday'))
+
+             for(let i=0;i<moment(currentDate,'dddd-DD:MM:YYYY',true).daysInMonth();i++)
+             {
+                 //  console.log(new Date(currentDate.getFullYear(), currentDate.getMonth()))
+                 let d= moment(currentDate,'dddd-DD:MM:YYYY',true).utc().startOf('month').add(i,'Days').isoWeekday()-1;
+
+
+                 if(!doctor.workingDays[d].isOpen)
+                 {
+
+                     list.push(moment(moment(currentDate,'dddd-DD:MM:YYYY',true).utc().startOf('month').add(i,'Days'),'dddd-DD:MM:YYYY',true).format('YYYY-MM-DD'))
+
+
+
+                 }
+
+             }
+
+             // setMarkedDates(list);
+             //{selected: true, selectedColor: '#999999'}
+             let newDaysObject = {};
+
+             list.forEach((day,key) => {
+                 newDaysObject = {
+                     ...newDaysObject,
+                     [day]: {disabled: true, disableTouchEvent: true}
+                 }
+
+             });
+             console.log(newDaysObject);
+             setMarkedDates(newDaysObject);
+
+
+
+}
+
+    },[doctor,currentDate])
+
+   const __getWorkingDays=async()=>{
+
+        await firestore().collection('user').doc(currentItem.id).get().then(
+            documentSnapshot => {
+                console.log("snap",documentSnapshot.data()['professional_info']['workingTime']);
+                setDoctor(
+                    {
+                        id:currentItem.id,
+                        workingDays:documentSnapshot.data()['professional_info']['workingTime']
+                    }
+                )
+
+
+            }
+
+        )
+
+
+
+
+    console.log("doctor",doctor);
+
+    }
+
+    const __getAvailableTime=async()=>{
+    console.log(selectedDate);
+    console.log(moment(selectedDate,'YYYY-MM-DD',true).utc(moment(new Date(),'Z')).isoWeekday()-1);
+    const divider=15;
+    const list=[];
+    doctor.workingDays[moment(selectedDate,'YYYY-MM-DD',true).utc(moment(new Date(),'Z')).isoWeekday()-1].time.map((val,key)=>{
+
+        list.push(doctor.workingDays[moment(selectedDate,'YYYY-MM-DD',true).utc(moment(new Date(),'Z')).isoWeekday()-1].time[0].openTime);
+    while(moment(list[list.length-1],'HH:mm').isBefore(moment(val.closeTime,'HH:mm')))
+    {
+        list.push(moment(list[list.length-1],'HH:mm').add(divider,'minutes').format('HH:mm'));
+    }
+
+    })
+        console.log("work time = ",list);
+        setWorkingTime(list);
+
+
+    }
+
+   // const db = firestore().collection('user').where('type','==','doctor')
        // .where('professional_info.speciality','==',route.params.spec)
      //   .where('professional_info.location','==',route.params.loc);
 
@@ -179,6 +329,66 @@ const ChooseDoctorScreen = ({ navigation, route }) => {
     );
 
 
+    useEffect(()=>{
+        let view =[]
+        if(workingTime)
+        {
+
+            workingTime.map((val,key)=>{
+               view.push(
+                   <View style={{height:'3%',width:'100%'}}>
+                       <TouchableOpacity style={{
+                           height:'80%',borderWidth:1,borderRadius:50,borderColor:'grey',width:'40%',alignSelf:'center',
+                           backgroundColor:selectedTime===val ? '#bebebe':'white'
+                       }}
+                       onPress={()=>{
+                           setSelectedTime(val)
+                            console.log("selected time ",selectedTime);
+
+
+                       }}
+
+                       >
+                           <Text style={{alignSelf:'center'}}>{val}</Text>
+                       </TouchableOpacity>
+                       <View style={{height:'20%'}}></View>
+                   </View>
+
+               )
+            })
+
+            setTimeView(view);
+
+        }
+    },[workingTime,selectedTime])
+
+
+    const __doAddAppointment=async()=>{
+        console.log(selectedTime);
+        console.log(moment(selectedDate+' '+selectedTime,'YYYY-MM-DD HH:mm',true).utc())
+        await firestore().collection('appointment').add({
+            date:firebase.firestore.Timestamp.fromDate(moment(selectedDate+' '+selectedTime,'YYYY-MM-DD HH:mm',true).utc().toDate()),
+            patient: firestore().doc('user/'+firebase.auth().currentUser.uid),
+            doctor:firestore().doc('user/'+doctor.id),
+            created:firebase.firestore.FieldValue.serverTimestamp(),
+            approved:false,
+        }).then(async(docRef)=> {
+            console.log("Document written with ID: ", docRef.id);
+            await firestore().collection('user')
+                .doc(firebase.auth().currentUser.uid)
+                .collection('appointment')
+                .doc(docRef.id).set({});
+
+            await firestore().collection('user')
+                .doc(doctor.id)
+                .collection('appointment')
+                .doc(docRef.id).set({});
+
+        });
+
+
+
+    }
     return (
         <View style={styles.container}>
 
@@ -260,9 +470,10 @@ const ChooseDoctorScreen = ({ navigation, route }) => {
                        deviceHeight={height}
                        style={{margin: 0}}
                        backdropTransitionOutTiming={0}
-                       animationInTiming={1300}
-                       animationOut={'slideOutDown'}
                        animationOutTiming={1300}
+                       animationInTiming={1300}
+                       animationIn={'slideInDown'}
+                       animationOut={'slideOutUp'}
                 >
 
                     <View style={{
@@ -466,7 +677,10 @@ const ChooseDoctorScreen = ({ navigation, route }) => {
                                 setDoctorVisible(true);
                                 setPersonalVisible(false);
                                 setAddressVisible(false);
+
                                 setAppointmentViewVisible(true);
+                                setSelectedDate(false);
+                                __getWorkingDays( );
                             }}
                         >
                             <Image source={require('../assets/FindDoctor/book.png')}    style={{resizeMode: 'stretch',width : width*0.98,alignItems: 'center',height : height*0.12}}/>
@@ -484,14 +698,16 @@ const ChooseDoctorScreen = ({ navigation, route }) => {
                        setAppointmentViewVisible(false);
 
                    }}
-                   onSwipeComplete={() => setViewVisible(false)}
+                   onSwipeComplete={() => setAppointmentViewVisible(false)}
                    swipeDirection={'down'}
                    deviceWidth={width}
                    deviceHeight={height}
                    style={{margin: 0}}
                    backdropTransitionOutTiming={0}
+                   animationOutTiming={1300}
                    animationInTiming={1300}
-
+                   animationIn={'slideInDown'}
+                   animationOut={'slideOutUp'}
             >
 
                 <View style={{
@@ -526,6 +742,7 @@ const ChooseDoctorScreen = ({ navigation, route }) => {
                                 <Icon.Button name="ios-arrow-back" size={40} backgroundColor="transparent" style={{marginLeft:50}}
                                              onPress={()=>{
                                                  setAppointmentViewVisible(false);
+                                                 setViewVisible(true);
 
                                              }} ></Icon.Button>
                             </View>
@@ -540,11 +757,36 @@ const ChooseDoctorScreen = ({ navigation, route }) => {
                     </View>
                   <View style={{flex:7 ,width:"80%",alignSelf:'center'}}>
                       <Calendar
-                          onDayPress={(day) => { setSelectedDate(day); setMarkedDates({
-                              [day.dateString]: {selected: true, selectedColor: '#19769F'}});console.log('selected day', markedDates);}}
-                          enableSwipeMonths={true}
+                          onDayPress={(day) => {
 
-                          markedDates={markedDates}
+
+
+                              let newDaysObject = markedDates;
+
+                              if(selectedDate){
+                                  console.log( newDaysObject[selectedDate]);
+                                delete  newDaysObject[selectedDate];
+
+                              }
+                              setSelectedDate(day.dateString);
+                              newDaysObject = {
+                                  ...newDaysObject,
+                                  [day.dateString]: {selected: true, selectedColor: '#19769F'}
+                              }
+
+                                setMarkedDates(newDaysObject);
+                         //     setMarkedDates({
+                         //     [day.dateString]: {selected: true, selectedColor: '#19769F'}});
+                       //   console.log('selected day', markedDates);
+                         }}
+                          enableSwipeMonths={true}
+                          onMonthChange={(month) => {
+                              console.log('month changed', month);
+                              console.log('month changed', moment(month.timestamp).format("YYYY-MM-DD"));
+                              setCurrentDate(moment(month.timestamp));
+                          }}
+                          markedDates={
+                              markedDates}
 
 
                       />
@@ -554,7 +796,107 @@ const ChooseDoctorScreen = ({ navigation, route }) => {
 
                 <TouchableOpacity
                     style={{alignContent: 'center',marginTop:"5%",marginBottom:'13%',height : height*0.1}}
+                    onPress={()=>{
+                        if(selectedDate){
+                            setAppointmentViewVisible(false);
+                            setTimeViewVisible(true);
+                            __getAvailableTime();
+                        }
+                    }
+                    }
+                >
+                    <Image source={require('../assets/FindDoctor/book.png')} style={{
+                        resizeMode: 'stretch',
+                        width: width * 0.98,
+                        alignItems: 'center',
+                        height: height * 0.12
+                    }}/>
 
+                </TouchableOpacity>
+            </Modal>
+            }
+            {selectedDate &&
+            <Modal isVisible={timeViewVisible}
+                //   propagateSwipe={true}
+                   onBackdropPress={() => {
+                       setTimeViewVisible(false);
+
+                   }}
+                  // onSwipeComplete={() => setTimeViewVisible(false)}
+               //    swipeDirection={'down'}
+                   deviceWidth={width}
+                   deviceHeight={height}
+                   style={{margin: 0}}
+                   backdropTransitionOutTiming={0}
+                   animationOutTiming={1300}
+                   animationInTiming={1300}
+                   animationIn={'slideInDown'}
+                   animationOut={'slideOutUp'}
+            >
+
+                <View style={{
+                    backgroundColor: '#fff',
+                    top: 0,
+                    width: width,
+                    height: height * 0.7,
+                    alignItems: 'center',
+                }}>
+                    <View style={{
+
+                        flex:1,
+                        width:width*1.2,
+                        height:"10%",
+                        alignItems:'center',
+                        alignContent: 'center',
+
+                        borderColor: '#e2e2e2',
+                    }
+                    }
+
+                    >
+                        <ImageBackground
+                            style={{  height:"100%",width:width*1.2, flexDirection: 'row',  flexWrap: "wrap",alignItems:'center',
+                                alignContent: 'center',}}
+                            source={require("../assets/header.png")}
+                        >
+                            <View style={{flex:3,height:"100%",
+                                alignContent: 'center',}}
+
+                            >
+                                <Icon.Button name="ios-arrow-back" size={40} backgroundColor="transparent" style={{marginLeft:50}}
+                                             onPress={()=>{
+                                                 setTimeViewVisible(false);
+                                                 setAppointmentViewVisible(true);
+                                             }} ></Icon.Button>
+                            </View>
+                            <View style={{flex:3}}></View>
+                            <View style={{flex:9,alignItems:'flex-start'}}>
+                                <Text style={{color:'#fff',fontSize:30}}>Doctor</Text>
+                            </View>
+                        </ImageBackground>
+                    </View>
+                    <View style={{flex:0.5}}>
+
+                    </View>
+                    <View style={{flex:7 ,width:"80%",alignSelf:'center'}}>
+
+                            <ScrollView style={{ flex:7}}>
+                                {timeView}
+                            </ScrollView>
+
+
+
+
+                    </View>
+
+                </View>
+
+                <TouchableOpacity
+                    style={{alignContent: 'center',marginTop:"5%",marginBottom:'13%',height : height*0.1}}
+                onPress={()=>{
+                    __doAddAppointment();
+                }
+                }
                 >
                     <Image source={require('../assets/FindDoctor/book.png')} style={{
                         resizeMode: 'stretch',
