@@ -27,6 +27,7 @@ import * as Animatable from 'react-native-animatable';
 import {Calendar, CalendarList, Agenda} from 'react-native-calendars';
 import mom from 'moment-weekdaysin';
 import moment_tz from 'moment-timezone';
+import PushNotification from "react-native-push-notification";
 const ChooseDoctorScreen = ({ navigation, route }) => {
     const [longitude, setLongitude] = React.useState(false);
     const [latitude, setLatitude] = React.useState(false);
@@ -377,12 +378,17 @@ if(doctor)
             await firestore().collection('user')
                 .doc(firebase.auth().currentUser.uid)
                 .collection('appointment')
-                .doc(docRef.id).set({});
+                .doc(docRef.id).set({
+                    docRef:firestore().doc('appointment/'+docRef.id)
+                });
 
             await firestore().collection('user')
                 .doc(doctor.id)
                 .collection('appointment')
-                .doc(docRef.id).set({});
+                .doc(docRef.id).set({
+                    docRef:firestore().doc('appointment/'+docRef.id)
+                });
+
 
         });
 

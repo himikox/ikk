@@ -17,7 +17,7 @@ import {
 } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import auth,{ firebase }  from "@react-native-firebase/auth"
-
+import PushController from './components/PushController';
 import {
   Provider as PaperProvider,
   DefaultTheme as PaperDefaultTheme,
